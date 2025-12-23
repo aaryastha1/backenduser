@@ -1,177 +1,3 @@
-// import express from "express";
-// import multer from "multer";
-// import path from "path";
-// import fs from "fs";
-// import Product from "../../models/admin/product.js";
-
-// const router = express.Router();
-
-// // ------------------- Multer for image upload -------------------
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     const dir = "uploads/products";
-//     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-//     cb(null, dir);
-//   },
-//   filename: (req, file, cb) => {
-//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-//     cb(null, uniqueSuffix + path.extname(file.originalname));
-//   },
-// });
-
-// const upload = multer({ storage });
-
-// // ------------------- Add Product -------------------
-// router.post("/add", upload.single("image"), async (req, res) => {
-//   try {
-//     const { name, description, occasion, flavours, sizes } = req.body;
-
-//     if (!name || !occasion || !sizes) {
-//       return res.status(400).json({ error: "Name, occasion, and sizes are required" });
-//     }
-
-//     // ---------------- Sizes parsing ----------------
-//     let sizesArray = [];
-//     try {
-//       sizesArray = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
-//     } catch {
-//       return res.status(400).json({ error: "Sizes must be a valid JSON array" });
-//     }
-
-//     // ---------------- Flavours parsing ----------------
-//     let flavoursArray = [];
-//     if (flavours) {
-//       try {
-//         flavoursArray = typeof flavours === "string" ? JSON.parse(flavours) : flavours;
-//         flavoursArray = flavoursArray.map(f => f.toString());
-//       } catch {
-//         flavoursArray = Array.isArray(flavours) ? flavours.map(f => f.toString()) : [];
-//       }
-//     }
-
-//     // ---------------- Description ----------------
-//     const desc = description ? description.toString() : "";
-
-//     // ---------------- Image ----------------
-//     const image = req.file ? `/uploads/products/${req.file.filename}` : "";
-
-//     // ---------------- Create Product ----------------
-//     const product = await Product.create({
-//       name,
-//       description: desc,
-//       occasion,
-//       flavours: flavoursArray,
-//       sizes: sizesArray,
-//       image,
-//     });
-
-//     res.json({ success: true, product });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
-// // ------------------- Get All Products -------------------
-// router.get("/", async (req, res) => {
-//   try {
-//     const products = await Product.find()
-//       .populate("occasion")
-//       .populate("flavours")
-//       .sort({ createdAt: -1 });
-//     res.json({ products });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
-// // ------------------- Get Single Product -------------------
-// router.get("/:id", async (req, res) => {
-//   try {
-//     const product = await Product.findById(req.params.id)
-//       .populate("occasion")
-//       .populate("flavours");
-//     if (!product) return res.status(404).json({ error: "Product not found" });
-//     res.json({ product });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
-// // ------------------- Update Product -------------------
-// router.put("/edit/:id", upload.single("image"), async (req, res) => {
-//   try {
-//     const { name, description, occasion, flavours, sizes } = req.body;
-
-//     let sizesArray;
-//     if (sizes) {
-//       try {
-//         sizesArray = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
-//       } catch {
-//         return res.status(400).json({ error: "Sizes must be a valid JSON array" });
-//       }
-//     }
-
-//     let flavoursArray = [];
-//     if (flavours) {
-//       try {
-//         flavoursArray = typeof flavours === "string" ? JSON.parse(flavours) : flavours;
-//         flavoursArray = flavoursArray.map(f => f.toString());
-//       } catch {
-//         flavoursArray = Array.isArray(flavours) ? flavours.map(f => f.toString()) : [];
-//       }
-//     }
-
-//     const updateData = {
-//       name,
-//       description: description ? description.toString() : "",
-//       occasion,
-//     };
-//     if (sizesArray) updateData.sizes = sizesArray;
-//     if (flavoursArray) updateData.flavours = flavoursArray;
-//     if (req.file) updateData.image = `/uploads/products/${req.file.filename}`;
-
-//     const product = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
-//     if (!product) return res.status(404).json({ error: "Product not found" });
-
-//     res.json({ success: true, product });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
-// // ------------------- Delete Product -------------------
-// router.delete("/delete/:id", async (req, res) => {
-//   try {
-//     const product = await Product.findByIdAndDelete(req.params.id);
-//     if (!product) return res.status(404).json({ error: "Product not found" });
-//     res.json({ success: true, message: "Product deleted" });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
-
-
-// // ------------------- Get Products By Occasion (USER SIDE) -------------------
-// router.get("/by-occasion/:occasionId", async (req, res) => {
-//   try {
-//     const { occasionId } = req.params;
-
-//     const products = await Product.find({ occasion: occasionId })
-//       .populate("occasion")
-//       .populate("flavours")
-//       .sort({ createdAt: -1 });
-
-//     res.json({ products });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: err.message });
-//   }
-// });
-
-// export default router;
-
 import express from "express";
 import multer from "multer";
 import path from "path";
@@ -195,7 +21,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-/* ================= GET ALL PRODUCTS (ADMIN) ================= */
+/* ================= GET ALL PRODUCTS ================= */
 router.get("/", async (req, res) => {
   try {
     const products = await Product.find()
@@ -203,9 +29,9 @@ router.get("/", async (req, res) => {
       .populate("flavours")
       .populate("colors")
       .sort({ createdAt: -1 });
-
     res.json({ products });
   } catch (err) {
+    console.error("Get all products error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -216,18 +42,12 @@ router.post("/add", upload.single("image"), async (req, res) => {
     const { name, description, occasion, flavours, colors, sizes } = req.body;
 
     if (!name || !occasion || !sizes) {
-      return res
-        .status(400)
-        .json({ error: "Name, occasion and sizes are required" });
+      return res.status(400).json({ error: "Name, occasion, and sizes are required" });
     }
 
     const sizesArray = typeof sizes === "string" ? JSON.parse(sizes) : sizes;
-    const flavoursArray = flavours
-      ? (typeof flavours === "string" ? JSON.parse(flavours) : flavours)
-      : [];
-    const colorsArray = colors
-      ? (typeof colors === "string" ? JSON.parse(colors) : colors)
-      : [];
+    const flavoursArray = flavours ? (typeof flavours === "string" ? JSON.parse(flavours) : flavours) : [];
+    const colorsArray = colors ? (typeof colors === "string" ? JSON.parse(colors) : colors) : [];
 
     const image = req.file ? `/uploads/products/${req.file.filename}` : "";
 
@@ -243,6 +63,73 @@ router.post("/add", upload.single("image"), async (req, res) => {
 
     res.json({ success: true, product });
   } catch (err) {
+    console.error("Add product error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ================= GET PRODUCT BY ID ================= */
+router.get("/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id)
+      .populate("occasion")
+      .populate("flavours")
+      .populate("colors");
+
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    res.json({ product });
+  } catch (err) {
+    console.error("Get product by ID error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ================= EDIT PRODUCT ================= */
+router.put("/edit/:id", upload.single("image"), async (req, res) => {
+  try {
+    const { name, description, occasion, sizes, flavours, colors } = req.body;
+
+    if (!name || !occasion || !sizes) {
+      return res.status(400).json({ error: "Name, occasion, and sizes are required" });
+    }
+
+    const updateData = {
+      name,
+      description: description || "",
+      occasion,
+      sizes: typeof sizes === "string" ? JSON.parse(sizes) : sizes,
+      flavours: flavours ? (typeof flavours === "string" ? JSON.parse(flavours) : flavours) : [],
+      colors: colors ? (typeof colors === "string" ? JSON.parse(colors) : colors) : [],
+    };
+
+    if (req.file) {
+      updateData.image = `/uploads/products/${req.file.filename}`;
+    }
+
+    const product = await Product.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    res.json({ success: true, product });
+  } catch (err) {
+    console.error("Edit product error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ================= DELETE PRODUCT ================= */
+router.delete("/delete/:id", async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Delete product error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -266,96 +153,23 @@ router.get("/by-occasion/:occasionId", async (req, res) => {
 
     res.json({ products });
   } catch (err) {
+    console.error("Products by occasion error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-/* ================= UPDATE PRODUCT ================= */
-/* ================= UPDATE PRODUCT ================= */
-router.put("/edit/:id", upload.single("image"), async (req, res) => {
+/* ================= GET FAVORITE PRODUCTS ================= */
+router.post("/favorites", async (req, res) => {
+  const { ids } = req.body; // array of product IDs
   try {
-    const {
-      name,
-      description,
-      occasion,
-      sizes,
-      flavours,
-      colors,
-    } = req.body;
-
-    const updateData = {
-      name,
-      description,
-      occasion,
-    };
-
-    // ✅ Parse arrays properly
-    if (sizes) {
-      updateData.sizes =
-        typeof sizes === "string" ? JSON.parse(sizes) : sizes;
-    }
-
-    if (flavours) {
-      updateData.flavours =
-        typeof flavours === "string" ? JSON.parse(flavours) : flavours;
-    }
-
-    if (colors) {
-      updateData.colors =
-        typeof colors === "string" ? JSON.parse(colors) : colors;
-    }
-
-    // ✅ Image update
-    if (req.file) {
-      updateData.image = `/uploads/products/${req.file.filename}`;
-    }
-
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    );
-
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    res.json({ success: true, product });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-/* ================= DELETE PRODUCT ================= */
-router.delete("/delete/:id", async (req, res) => {
-  try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product)
-      return res.status(404).json({ error: "Product not found" });
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-/* ================= GET SINGLE PRODUCT BY ID ================= */
-router.get("/:id", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id)
+    const products = await Product.find({ _id: { $in: ids } })
       .populate("occasion")
       .populate("flavours")
       .populate("colors");
-
-    if (!product) return res.status(404).json({ error: "Product not found" });
-
-    res.json({ product });
+    res.json(products);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    console.error("Get favorite products error:", err.message);
+    res.status(500).json({ message: "Failed to fetch favorite products" });
   }
 });
 

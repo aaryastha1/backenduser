@@ -6,6 +6,7 @@ import path from "path";
 import userRoutes from "./routers/userRoutes.js";
 import homeRoutes from "./routers/homeRoutes.js";
 import profileRoute from "./routers/profileRoute.js";
+import favoriteRoutes from "./routers/favoriteRoutes.js";
 
 import cakeRoutes from "./routers/cakeRoutes.js";
 import customizeRoutes from "./routers/customizeRoutes.js";
@@ -36,6 +37,7 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRoutes);
 app.use("/api/home", homeRoutes);
 app.use("/api/user", profileRoute)
+app.use("/api/favorites", favoriteRoutes);
 
 
 // NEW APIs for customization
