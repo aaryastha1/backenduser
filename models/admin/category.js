@@ -16,6 +16,8 @@
 
 
 // models/admin/category.js
+
+
 import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema(
@@ -24,7 +26,7 @@ const categorySchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["occasion", "flavour", "size", "color"], // ✅ ADD color
+      enum: ["occasion", "flavour", "size", "color", "bakeries"], // ✅ ADD color
     },
     image: { type: String, default: "" }, 
   },

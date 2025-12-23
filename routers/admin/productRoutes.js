@@ -271,25 +271,62 @@ router.get("/by-occasion/:occasionId", async (req, res) => {
 });
 
 /* ================= UPDATE PRODUCT ================= */
+/* ================= UPDATE PRODUCT ================= */
 router.put("/edit/:id", upload.single("image"), async (req, res) => {
   try {
-    const updateData = req.body;
-    if (req.file) updateData.image = `/uploads/products/${req.file.filename}`;
+    const {
+      name,
+      description,
+      occasion,
+      sizes,
+      flavours,
+      colors,
+    } = req.body;
+
+    const updateData = {
+      name,
+      description,
+      occasion,
+    };
+
+    // ✅ Parse arrays properly
+    if (sizes) {
+      updateData.sizes =
+        typeof sizes === "string" ? JSON.parse(sizes) : sizes;
+    }
+
+    if (flavours) {
+      updateData.flavours =
+        typeof flavours === "string" ? JSON.parse(flavours) : flavours;
+    }
+
+    if (colors) {
+      updateData.colors =
+        typeof colors === "string" ? JSON.parse(colors) : colors;
+    }
+
+    // ✅ Image update
+    if (req.file) {
+      updateData.image = `/uploads/products/${req.file.filename}`;
+    }
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true }
+      { new: true, runValidators: true }
     );
 
-    if (!product)
+    if (!product) {
       return res.status(404).json({ error: "Product not found" });
+    }
 
     res.json({ success: true, product });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 /* ================= DELETE PRODUCT ================= */
 router.delete("/delete/:id", async (req, res) => {
