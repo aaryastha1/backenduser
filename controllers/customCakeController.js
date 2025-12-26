@@ -13,19 +13,21 @@ const parseIds = (value) => {
 // ------------------ CREATE CUSTOM CAKE ------------------
 export const createCustomCake = async (req, res) => {
   try {
-    const { name, basePrice, flavour, size, color } = req.body;
+    const { name, basePrice, flavour, size, color, shape, toppings } = req.body;
 
     // Parse IDs
     const flavourIds = parseIds(flavour);
     const sizeIds = parseIds(size);
     const colorIds = parseIds(color);
+    const shapeIds = parseIds(shape);       // ✅ NEW
+    const toppingIds = parseIds(toppings);  // ✅ NEW
 
     // Prepare colorImages array
     const colorImagesArray = [];
     if (req.files && req.files.colorImages) {
       req.files.colorImages.forEach((file, index) => {
         colorImagesArray.push({
-          color: colorIds[index], // match color ID with uploaded image
+          color: colorIds[index] || null, // match color ID with uploaded image
           image: `/uploads/custom-cakes/${file.filename}`,
         });
       });
@@ -40,6 +42,8 @@ export const createCustomCake = async (req, res) => {
       size: sizeIds,
       color: colorIds,
       colorImages: colorImagesArray,
+      shape: shapeIds,       // ✅ include shape
+      toppings: toppingIds,  // ✅ include toppings
     });
 
     res.status(201).json({ success: true, cake });
@@ -53,10 +57,12 @@ export const createCustomCake = async (req, res) => {
 export const getAllCustomCakes = async (req, res) => {
   try {
     const cakes = await CustomCake.find({ isActive: true })
-      .populate("flavour", "name desc")         // get flavour names & desc
-      .populate("size", "name price")           // get size names & prices
-      .populate("color", "name")                // get color names
-      .populate("colorImages.color", "name")    // get color names for images
+      .populate("flavour", "name desc")
+      .populate("size", "name price")
+      .populate("color", "name")
+      .populate("colorImages.color", "name")
+      .populate("shape", "name image")    // ✅ shape populated
+      .populate("toppings", "name image") // ✅ toppings populated
       .sort({ createdAt: -1 });
 
     res.json(cakes);
@@ -73,7 +79,9 @@ export const getCustomCakeById = async (req, res) => {
       .populate("flavour", "name desc")
       .populate("size", "name price")
       .populate("color", "name")
-      .populate("colorImages.color", "name");
+      .populate("colorImages.color", "name")
+      .populate("shape", "name image")    // ✅ shape populated
+      .populate("toppings", "name image"); // ✅ toppings populated
 
     res.json(cake);
   } catch (err) {

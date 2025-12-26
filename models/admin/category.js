@@ -26,7 +26,7 @@ const categorySchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["occasion", "flavour", "size", "color", "bakeries"], // ✅ ADD color
+      enum: ["occasion", "flavour", "size", "color", "bakeries", "shape", "topping"], // ✅ ADD color
     },
     image: { type: String, default: "" }, 
   },

@@ -32,6 +32,8 @@ const customCakeSchema = new mongoose.Schema(
     colorImages: [
       { color: { type: mongoose.Schema.Types.ObjectId, ref: "Category" }, image: String }
     ],
+    shape: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }], // NEW
+    toppings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }], // NEW
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
