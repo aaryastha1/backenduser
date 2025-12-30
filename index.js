@@ -7,12 +7,13 @@ import userRoutes from "./routers/userRoutes.js";
 import homeRoutes from "./routers/homeRoutes.js";
 import profileRoute from "./routers/profileRoute.js";
 import favoriteRoutes from "./routers/favoriteRoutes.js";
+import cartRoutes from "./routers/cartRoutes.js";
 
 import cakeRoutes from "./routers/cakeRoutes.js";
-import customizeRoutes from "./routers/customizeRoutes.js";
+
 import admincakeRoutes from "./routers/admin/admincakeRoutes.js";
 import customOrderRoutes from "./routers/admin/customOrderRoutes.js";
-import customCakeRoutes from "./routers/admin/customCakeRoutes.js"
+import customCakeRoutes from "./routers/customCakeRoutes.js";
 import bakeryRoutes from "./routers/admin/bakeryRoutes.js"
 
 
@@ -42,7 +43,7 @@ app.use("/api/favorites", favoriteRoutes);
 
 // NEW APIs for customization
 app.use("/api/cakes", cakeRoutes);          // GET filtering cakes
-app.use("/api/customize", customizeRoutes);
+
 
 
 app.use("/api/admin/cakes", admincakeRoutes);
@@ -50,13 +51,14 @@ app.use("/api/admin/cakes", admincakeRoutes);
 import categoryRoutes from "./routers/admin/categoryRoutes.js";
 
 app.use("/api/admin/categories", categoryRoutes);
+app.use("/api/cart", cartRoutes);
 
 
 import productRoutes from "./routers/admin/productRoutes.js";
 
 app.use("/api/admin/products", productRoutes);
 app.use("/api/customOrders", customOrderRoutes);
-app.use("/api/admin/custom-cakes", customCakeRoutes);
+app.use("/api/custom-cakes", customCakeRoutes);
 app.use("/api/admin/bakery", bakeryRoutes);
 
 // Export app so server.js can start it
