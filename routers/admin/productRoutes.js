@@ -173,4 +173,22 @@ router.post("/favorites", async (req, res) => {
   }
 });
 
+
+
+/* ================= GET RELATED PRODUCTS (BY OCCASION) ================= */
+router.get("/related/:occasionId", async (req, res) => {
+  try {
+    const { occasionId } = req.params;
+    // Find products with same occasion, limit to 5, and exclude current if needed on frontend
+    const products = await Product.find({ occasion: occasionId }).limit(5);
+    res.json({ products });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch related products" });
+  }
+});
+
+
+
+
+
 export default router;

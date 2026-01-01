@@ -14,7 +14,8 @@ import cakeRoutes from "./routers/cakeRoutes.js";
 import admincakeRoutes from "./routers/admin/admincakeRoutes.js";
 import customOrderRoutes from "./routers/admin/customOrderRoutes.js";
 import customCakeRoutes from "./routers/customCakeRoutes.js";
-import bakeryRoutes from "./routers/admin/bakeryRoutes.js"
+import bakeryRoutes from "./routers/admin/bakeryRoutes.js";
+import searchRoutes from "./routers/searchRoutes.js";
 
 
 
@@ -39,6 +40,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/home", homeRoutes);
 app.use("/api/user", profileRoute)
 app.use("/api/favorites", favoriteRoutes);
+app.use("/api", searchRoutes);
 
 
 // NEW APIs for customization

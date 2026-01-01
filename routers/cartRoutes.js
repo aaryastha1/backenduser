@@ -2,22 +2,24 @@ import express from "express";
 import authMiddleware from "../middlewares/auth.js";
 import {
   addToCart,
-  getUserCart,
+  subtractFromCart,
   removeFromCart,
-  subtractFromCart
+  getUserCart
 } from "../controllers/cartController.js";
 
 const router = express.Router();
 
-// ➕ ADD TO CART (user only)
+// ➕ Add to cart
 router.post("/add", authMiddleware, addToCart);
 
+// ➖ Subtract from cart
 router.post("/subtract", authMiddleware, subtractFromCart);
 
-// 📦 GET USER CART
+// 📦 Get cart
 router.get("/", authMiddleware, getUserCart);
 
-// ❌ REMOVE FROM CART (productId + size)
-router.delete("/remove/:productId/:size", authMiddleware, removeFromCart);
+// ❌ Remove from cart
+// optional query `?size=` for Product
+router.delete("/remove/:itemId/:itemType", authMiddleware, removeFromCart);
 
 export default router;

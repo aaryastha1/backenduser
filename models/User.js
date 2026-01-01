@@ -26,14 +26,19 @@
 import mongoose from "mongoose";
 const cartItemSchema = new mongoose.Schema(
   {
+    itemType: {
+      type: String,
+      enum: ["Product", "Bakery", ], // <- tells if it's a product or bakery
+      required: true,
+    },
     product: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
       required: true,
+      refPath: "itemType", // <- dynamic reference based on itemType
     },
     selectedSize: {
       type: String,
-      required: true,
+      default: "", // optional, only for products with sizes
     },
     quantity: {
       type: Number,
@@ -47,6 +52,7 @@ const cartItemSchema = new mongoose.Schema(
   },
   { _id: false }
 );
+
 
 
 const userSchema = new mongoose.Schema(
