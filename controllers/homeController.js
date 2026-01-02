@@ -27,7 +27,7 @@ export const getHomeData = async (req, res) => {
           title: "Special Orders",
           description:
             "Create the perfect cake for your celebration with endless customization options.",
-          image: "/uploads/custome.png",
+          image: "/uploads/homeee.png",
         },
 
         contact: {

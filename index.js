@@ -1,6 +1,11 @@
+import dotenv from "dotenv";
+dotenv.config()
+
 import express from "express";
 import cors from "cors";
 import path from "path";
+
+
 
 // Import your routes
 import userRoutes from "./routers/userRoutes.js";
@@ -62,6 +67,11 @@ app.use("/api/admin/products", productRoutes);
 app.use("/api/customOrders", customOrderRoutes);
 app.use("/api/custom-cakes", customCakeRoutes);
 app.use("/api/admin/bakery", bakeryRoutes);
+
+import paymentRoutes from "./routers/payment.js";
+
+app.use("/api/payment", paymentRoutes);
+
 
 // Export app so server.js can start it
 export default app;
