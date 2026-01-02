@@ -368,3 +368,22 @@ export const getUserCart = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+/**
+ * 🧹 CLEAR ENTIRE CART
+ */
+
+export const clearCart = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.cart = []; // Empty the array
+    await user.save(); // Don't forget to save!
+
+    res.status(200).json({ message: "Cart cleared" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

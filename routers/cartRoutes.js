@@ -4,13 +4,18 @@ import {
   addToCart,
   subtractFromCart,
   removeFromCart,
-  getUserCart
+  getUserCart,
+  clearCart
 } from "../controllers/cartController.js";
 
 const router = express.Router();
 
 // ➕ Add to cart
 router.post("/add", authMiddleware, addToCart);
+
+
+// 🧹 Clear entire cart (ADD THIS LINE)
+router.delete("/clear", authMiddleware, clearCart);
 
 // ➖ Subtract from cart
 router.post("/subtract", authMiddleware, subtractFromCart);
