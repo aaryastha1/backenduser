@@ -1,6 +1,7 @@
 import express from "express";
 import crypto from "crypto";
 import Order from "../models/Order.js";
+import authMiddleware from "../middlewares/auth.js"; // ✅ ADDED
 
 const router = express.Router();
 
@@ -10,18 +11,43 @@ const generateSignature = (message) => {
   return crypto.createHmac("sha256", secret).update(message).digest("base64");
 };
 
-router.post("/esewa/initiate", async (req, res) => {
+router.post("/esewa/initiate", authMiddleware, async (req, res) => { // ✅ ADDED
   try {
-    const { total, subtotal, shipping, items, address, phone, email, scheduleDate, scheduleTime } = req.body;
+    const {
+      total,
+      subtotal,
+      shipping,
+      items,
+      firstName,
+      lastName,
+      address,
+      phone,
+      email,
+      scheduleDate,
+      scheduleTime,
+    } = req.body;
+
+    // ✅ FIX: Explicitly map items to include name and image
+    const orderItems = items.map((item) => ({
+      product: item.productId || item._id || item.id,
+      name: item.name,
+      image: item.image, // <--- This saves the photo to the DB
+      price: item.price,
+      quantity: item.quantity,
+      size: item.selectedSize || item.size || null,
+    }));
 
     // 1. Create Order in DB
     const order = await Order.create({
-      items,
+      user: req.userId, // ✅ NOW THIS WORKS
+      items: orderItems,
       amount: subtotal,
       shipping,
       total,
       paymentMethod: "ESEWA",
       paymentStatus: "PENDING",
+      firstName,
+      lastName,
       address,
       phone,
       email,
@@ -32,13 +58,18 @@ router.post("/esewa/initiate", async (req, res) => {
     // 2. Format Data for eSewa (Strict 2 decimal places)
     const transaction_uuid = order._id.toString();
     const product_code = "EPAYTEST";
-    
+
     // eSewa Math: total_amount = amount + tax + service + delivery
     const amt = Number(subtotal).toFixed(2);
     const tax = "0.00";
     const service = "0.00";
     const delivery = Number(shipping).toFixed(2);
-    const total_amt = (Number(amt) + Number(tax) + Number(service) + Number(delivery)).toFixed(2);
+    const total_amt = (
+      Number(amt) +
+      Number(tax) +
+      Number(service) +
+      Number(delivery)
+    ).toFixed(2);
 
     // 3. Generate Signature Message (NO SPACES after commas)
     const signatureMessage = `total_amount=${total_amt},transaction_uuid=${transaction_uuid},product_code=${product_code}`;
@@ -68,7 +99,7 @@ router.post("/esewa/initiate", async (req, res) => {
   }
 });
 
-// SUCCESS CALLBACK (Remains the same as your current one)
+// SUCCESS CALLBACK
 router.get("/esewa/success", async (req, res) => {
   try {
     const { data } = req.query;
@@ -82,6 +113,7 @@ router.get("/esewa/success", async (req, res) => {
       });
       return res.redirect("http://localhost:5173/payment-success");
     }
+
     res.redirect("http://localhost:5173/payment-failed");
   } catch (err) {
     res.redirect("http://localhost:5173/payment-failed");
