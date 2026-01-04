@@ -27,15 +27,16 @@ router.post("/esewa/initiate", authMiddleware, async (req, res) => { // ✅ ADDE
       scheduleTime,
     } = req.body;
 
-    // ✅ FIX: Explicitly map items to include name and image
-    const orderItems = items.map((item) => ({
-      product: item.productId || item._id || item.id,
-      name: item.name,
-      image: item.image, // <--- This saves the photo to the DB
-      price: item.price,
-      quantity: item.quantity,
-      size: item.selectedSize || item.size || null,
-    }));
+   const orderItems = items.map((item) => ({
+  productId: item.item?._id || item.productId || item._id, 
+  itemType: item.itemType || "Product",
+  name: item.item?.name || item.name || "Unknown Product", 
+  image: item.image || item.item?.image || "", // Saves the path string
+  price: item.price,
+  quantity: item.quantity,
+  size: item.selectedSize || item.size || null,
+  notes: item.notes || "" // Capture notes if passed from cart
+}));
 
     // 1. Create Order in DB
     const order = await Order.create({

@@ -5,12 +5,14 @@ const orderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
  items: [
     {
-      productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+      productId: { type: mongoose.Schema.Types.ObjectId, refPath: 'items.itemType' },
+      itemType: { type: String, enum: ['Product', 'Bakery'] }, // Track which model it came from
       name: String,
       price: Number,
       quantity: Number,
-      image: String, // Store the image URL here
-      category: String // e.g., 'Bakery' or 'Cake'
+      image: String,
+      size: String,
+      notes: String // Added notes field
     }
   ],
   amount: Number,

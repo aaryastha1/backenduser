@@ -30,16 +30,15 @@ router.post("/", authMiddleware, async (req, res) => {
       return res.status(400).json({ message: "No order items" });
 
     // Map items and allow product as string to avoid ObjectId errors
-    const orderItems = items.map((item) => ({
-      product: item._id || item.product || null, // keep whatever ID you send
-      name: item.name ||  "Product", 
-      image: item.image,
-      price: item.price,
-      quantity: item.quantity,
-      flavor: item.flavor,
-      size: item.size,
-      note: item.note,
-    }));
+  const orderItems = items.map((item) => ({
+  productId: item.productId || item._id || null,
+  name: item.name,
+  image: item.image || "",
+  price: item.price,
+  quantity: item.quantity || 1,
+  size: item.selectedSize || item.size || null,
+}));
+
 
     const order = await Order.create({
       user: req.userId,

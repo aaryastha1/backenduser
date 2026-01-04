@@ -59,6 +59,10 @@ app.use("/api/customOrders", customOrderRoutes);
 app.use("/api/custom-cakes", customCakeRoutes);
 app.use("/api/admin/bakery", bakeryRoutes);
 app.use("/api/admin/orders", adminOrder);
+// server.js
+import adminDashboardRoutes from "./routers/admin/dashbRoutes.js"; // or your specific filename
+
+app.use("/api/admin/dash", adminDashboardRoutes);
 
 
 

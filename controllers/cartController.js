@@ -300,26 +300,23 @@ export const subtractFromCart = async (req, res) => {
 export const removeFromCart = async (req, res) => {
   try {
     const { itemId, itemType } = req.params;
-    const size = (req.query.size || "").trim();
-
-    if (!itemId || !itemType || !["Product", "Bakery"].includes(itemType)) {
-      return res.status(400).json({ message: "Valid item and type are required" });
-    }
+    const size = (req.query.size || "").trim().toLowerCase();
 
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    user.cart = user.cart.filter(
-      i =>
-        !(i.product.toString() === itemId &&
-          i.itemType === itemType &&
-          i.selectedSize?.trim().toLowerCase() === size.toLowerCase())
-    );
+    // FIX: Use .toString() on both IDs to ensure they match
+    user.cart = user.cart.filter(i => {
+      const isSameId = i.product.toString() === itemId.toString();
+      const isSameType = i.itemType === itemType;
+      const isSameSize = (i.selectedSize || "").trim().toLowerCase() === size;
+      
+      return !(isSameId && isSameType && isSameSize);
+    });
 
     await user.save();
     res.status(200).json({ message: "Removed", cart: user.cart });
   } catch (error) {
-    console.error("REMOVE FROM CART ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -329,12 +326,12 @@ export const removeFromCart = async (req, res) => {
  */
 
 
+// controllers/cartController.js
+
 export const getUserCart = async (req, res) => {
   try {
     const user = await User.findById(req.userId).lean();
     if (!user) return res.status(404).json({ message: "User not found" });
-
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:5006";
 
     const cart = await Promise.all(
       user.cart.map(async (item) => {
@@ -346,25 +343,23 @@ export const getUserCart = async (req, res) => {
           productData = await Bakery.findById(item.product).lean();
         }
 
-        // Prepare absolute image URL
-        let imageUrl = "";
-        if (productData) {
-          if (productData.image) imageUrl = `${backendUrl}/${productData.image}`;
-          else if (productData.images?.length > 0)
-            imageUrl = `${backendUrl}/${productData.images[0]}`;
-        }
-
         return {
-          ...item,
-          item: productData,
-          image: imageUrl, // frontend can use this directly
+          _id: item._id,
+          productId: item.product, // Ensure ID is passed clearly
+          itemType: item.itemType,
+          quantity: item.quantity,
+          selectedSize: item.selectedSize || null,
+          price: item.price,
+          name: productData?.name || "Unknown Product", // Add name here
+          // FIX: Send the relative path only. 
+          // Do not add BACKEND_URL here.
+          image: productData?.image || productData?.images?.[0] || "", 
         };
       })
     );
 
     res.status(200).json(cart);
   } catch (error) {
-    console.error("GET CART ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
