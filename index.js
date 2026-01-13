@@ -19,6 +19,7 @@ import customCakeRoutes from "./routers/customCakeRoutes.js";
 import bakeryRoutes from "./routers/admin/bakeryRoutes.js";
 import searchRoutes from "./routers/searchRoutes.js";
 import orderRoutes from "./routers/orderRoutes.js"
+import reviewRoutes from "./routers/reviewRoutes.js";
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use("/api/orders", orderRoutes);
 import paymentRoutes from "./routers/payment.js";
 
 app.use("/api/payment", paymentRoutes);
+app.use("/api/reviews", reviewRoutes)
 
 
 // Export app so server.js can start it
