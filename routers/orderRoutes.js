@@ -29,15 +29,17 @@ router.post("/", authMiddleware, async (req, res) => {
     if (!items || items.length === 0)
       return res.status(400).json({ message: "No order items" });
 
-    // Map items and allow product as string to avoid ObjectId errors
-  const orderItems = items.map((item) => ({
+const orderItems = items.map((item) => ({
   productId: item.productId || item._id || null,
+  itemType: item.itemType || "Product", // track which model
   name: item.name,
   image: item.image || "",
   price: item.price,
   quantity: item.quantity || 1,
   size: item.selectedSize || item.size || null,
+  notes: item.notes || "", // <-- save customer notes
 }));
+
 
 
     const order = await Order.create({
@@ -93,5 +95,23 @@ router.get("/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Error fetching order" });
   }
 });
+
+// routes/orders.js
+router.get("/admin/orders", authMiddleware, async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "items.productId",
+        populate: { path: "occasion", select: "name notes" }, // populate occasion notes
+      });
+
+    res.json(orders);
+  } catch (err) {
+    console.error("Failed to fetch orders:", err);
+    res.status(500).json({ message: "Failed to fetch orders" });
+  }
+});
+
 
 export default router;
