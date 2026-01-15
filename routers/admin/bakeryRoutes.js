@@ -30,18 +30,27 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ POST add bakery product
+// ✅ POST add bakery product (NO negative price)
 router.post("/add", upload.single("image"), async (req, res) => {
   try {
     const { name, price, category } = req.body;
 
-    if (!name || !price || !category) {
-      return res.status(400).json({ error: "Name, price and category are required" });
+    if (!name || price === undefined || !category) {
+      return res.status(400).json({
+        error: "Name, price and category are required",
+      });
+    }
+
+    // ❌ Prevent negative price
+    if (Number(price) < 0) {
+      return res.status(400).json({
+        error: "Price cannot be negative",
+      });
     }
 
     const bakery = await Bakery.create({
       name,
-      price,
+      price: Number(price),
       category,
       image: req.file ? `/${req.file.path}` : "",
     });
@@ -51,6 +60,7 @@ router.post("/add", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // ✅ GET bakery products by category
 router.get("/category/:categoryId", async (req, res) => {
@@ -63,19 +73,53 @@ router.get("/category/:categoryId", async (req, res) => {
   }
 });
 
-// ✅ PUT update bakery item
+// ✅ PUT update bakery item (NO negative price)
 router.put("/:id", upload.single("image"), async (req, res) => {
   try {
     const updateData = { ...req.body };
+
+    // ❌ Prevent negative price (if price is being updated)
+    if (updateData.price !== undefined && Number(updateData.price) < 0) {
+      return res.status(400).json({
+        error: "Price cannot be negative",
+      });
+    }
+
     if (req.file) {
       updateData.image = `/${req.file.path}`;
     }
-    const updated = await Bakery.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    res.json(updated);
+
+    const updated = await Bakery.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Bakery item not found" });
+    }
+
+    res.json({ success: true, updated });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+// ✅ GET single bakery item (View)
+router.get("/:id", async (req, res) => {
+  try {
+    const item = await Bakery.findById(req.params.id).populate("category", "name");
+    if (!item) {
+      return res.status(404).json({ error: "Bakery item not found" });
+    }
+    res.json(item);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 // ✅ DELETE bakery item
 router.delete("/:id", async (req, res) => {

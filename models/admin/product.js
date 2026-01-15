@@ -60,13 +60,21 @@ const productSchema = new mongoose.Schema(
       },
     ],
 
-    // 📏 Sizes
-    sizes: [
-      {
-        size: { type: String, required: true }, // "1 Pound"
-        price: { type: Number, required: true },
+   sizes: [
+  {
+    size: { type: String, required: true },
+    price: {
+      type: Number,
+      required: true,
+      min: [0, "Price cannot be negative"],
+      validate: {
+        validator: v => v >= 0,
+        message: "Price must be 0 or greater",
       },
-    ],
+    },
+  },
+],
+
 
     // 🖼 Image
     image: {

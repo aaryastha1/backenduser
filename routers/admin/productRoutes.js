@@ -50,6 +50,15 @@ router.post("/add", upload.single("image"), async (req, res) => {
     const colorsArray = colors ? (typeof colors === "string" ? JSON.parse(colors) : colors) : [];
 
     const image = req.file ? `/uploads/products/${req.file.filename}` : "";
+    // ❌ Prevent negative prices
+for (const s of sizesArray) {
+  if (s.price < 0) {
+    return res.status(400).json({
+      error: "Price cannot be negative",
+    });
+  }
+}
+
 
     const product = await Product.create({
       name,
@@ -91,28 +100,54 @@ router.put("/edit/:id", upload.single("image"), async (req, res) => {
     const { name, description, occasion, sizes, flavours, colors } = req.body;
 
     if (!name || !occasion || !sizes) {
-      return res.status(400).json({ error: "Name, occasion, and sizes are required" });
+      return res.status(400).json({
+        error: "Name, occasion, and sizes are required",
+      });
+    }
+
+    // ✅ Parse sizes FIRST
+    const parsedSizes = typeof sizes === "string"
+      ? JSON.parse(sizes)
+      : sizes;
+
+    // ❌ Prevent negative prices
+    for (const s of parsedSizes) {
+      if (Number(s.price) < 0) {
+        return res.status(400).json({
+          error: "Price cannot be negative",
+        });
+      }
     }
 
     const updateData = {
       name,
       description: description || "",
       occasion,
-      sizes: typeof sizes === "string" ? JSON.parse(sizes) : sizes,
-      flavours: flavours ? (typeof flavours === "string" ? JSON.parse(flavours) : flavours) : [],
-      colors: colors ? (typeof colors === "string" ? JSON.parse(colors) : colors) : [],
+      sizes: parsedSizes,
+      flavours: flavours
+        ? (typeof flavours === "string" ? JSON.parse(flavours) : flavours)
+        : [],
+      colors: colors
+        ? (typeof colors === "string" ? JSON.parse(colors) : colors)
+        : [],
     };
 
     if (req.file) {
       updateData.image = `/uploads/products/${req.file.filename}`;
     }
 
-    const product = await Product.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      {
+        new: true,
+        runValidators: true, // ✅ very important
+      }
+    );
 
-    if (!product) return res.status(404).json({ error: "Product not found" });
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
 
     res.json({ success: true, product });
   } catch (err) {
@@ -121,31 +156,20 @@ router.put("/edit/:id", upload.single("image"), async (req, res) => {
   }
 });
 
-/* ================= DELETE PRODUCT ================= */
-router.delete("/delete/:id", async (req, res) => {
-  try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) return res.status(404).json({ error: "Product not found" });
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Delete product error:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
 
-/* ================= PRODUCTS BY OCCASION + FILTERS ================= */
 router.get("/by-occasion/:occasionId", async (req, res) => {
   try {
     const { occasionId } = req.params;
-    const { flavour, color, size } = req.query;
+    const { flavour } = req.query; // <-- get flavour from query
 
-    const filter = { occasion: occasionId };
-    if (flavour) filter.flavours = { $in: [flavour] };
-    if (color) filter.colors = { $in: [color] };
-    if (size) filter["sizes.size"] = size;
+    let query = { occasion: occasionId };
 
-    const products = await Product.find(filter)
+    if (flavour && flavour !== "all") {
+      query.flavours = flavour; // MongoDB will match ObjectId in array
+    }
+
+    const products = await Product.find(query)
       .populate("occasion")
       .populate("flavours")
       .populate("colors")
@@ -153,37 +177,35 @@ router.get("/by-occasion/:occasionId", async (req, res) => {
 
     res.json({ products });
   } catch (err) {
-    console.error("Products by occasion error:", err.message);
+    console.error("Get products by occasion error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-/* ================= GET FAVORITE PRODUCTS ================= */
-router.post("/favorites", async (req, res) => {
-  const { ids } = req.body; // array of product IDs
+
+
+
+/* ================= DELETE PRODUCT ================= */
+router.delete("/delete/:id", async (req, res) => {
   try {
-    const products = await Product.find({ _id: { $in: ids } })
-      .populate("occasion")
-      .populate("flavours")
-      .populate("colors");
-    res.json(products);
+    const product = await Product.findByIdAndDelete(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // 🧹 Optional: delete image file from server
+    if (product.image) {
+      const imagePath = path.join(process.cwd(), product.image);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    res.json({ success: true, message: "Product deleted successfully" });
   } catch (err) {
-    console.error("Get favorite products error:", err.message);
-    res.status(500).json({ message: "Failed to fetch favorite products" });
-  }
-});
-
-
-
-/* ================= GET RELATED PRODUCTS (BY OCCASION) ================= */
-router.get("/related/:occasionId", async (req, res) => {
-  try {
-    const { occasionId } = req.params;
-    // Find products with same occasion, limit to 5, and exclude current if needed on frontend
-    const products = await Product.find({ occasion: occasionId }).limit(5);
-    res.json({ products });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch related products" });
+    console.error("Delete product error:", err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 

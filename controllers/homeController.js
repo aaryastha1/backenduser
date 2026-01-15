@@ -19,7 +19,7 @@ export const getHomeData = async (req, res) => {
           { name: "White Forest", imageUrl: "/uploads/whiteForest.png" },
           { name: "Tiramisu", imageUrl: "/uploads/Tiramisu.png" },
           { name: "Raspberry Heart", imageUrl: "/uploads/rasberry.png" },
-          { name: "Chocolate Chip Cookies", imageUrl: "/uploads/cookies.png" },
+          { name: "Chocolate Cookies", imageUrl: "/uploads/cookies.png" },
           // { name: "Bento", imageUrl: "/uploads/bento.jpg"},
         ],
 
